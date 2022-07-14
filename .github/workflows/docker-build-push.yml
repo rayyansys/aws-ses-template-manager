@@ -8,7 +8,7 @@ on:
       - v*
 
 env:
-  IMAGE_NAME: MattRuddick/aws-ses-template-manager
+  IMAGE_NAME: rayyansys/aws-ses-template-manager
 
 jobs:
   docker:
