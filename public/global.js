@@ -1,5 +1,21 @@
 const currentVersion = "v1.5.4";
 
+// updates email Live Preview
+const onCodeMirrorInputRead = (editor) => {
+  $("#templatePreview").attr("srcDoc", editor.getValue());
+};
+
+// contributor's defined global variable "window.codeMirrorEditor" wont be available right away, so we need to wait for it to be available
+function listenToCodeMirror() {
+  const editor = window.codeMirrorEditor;
+
+  if (typeof editor !== "undefined") {
+    editor.on("change", onCodeMirrorInputRead);
+  } else {
+    setTimeout(listenToCodeMirror, 250);
+  }
+}
+
 function populateTextSectionContent() {
   //Will strip template html of html tags leaving inner content for the template text field
   const htmlString = window.codeMirrorEditor.getValue().trim();
@@ -42,5 +58,7 @@ function populateTextSectionContent() {
       `);
       $('[data-toggle="tooltip"]').tooltip();
     }
+
+    listenToCodeMirror();
   });
 })();
