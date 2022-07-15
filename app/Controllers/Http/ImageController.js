@@ -13,13 +13,12 @@ if (
     profile: Env.get("AWS_PROFILE_NAME", "default"),
   });
 }
+const awsCloudFrontSigner = require("aws-cloudfront-sign");
 
 class ImageController {
   // uploads image to S3, returns image url
   async uploadImage({ request, response }) {
     const { region } = request.all();
-
-    console.log("c");
 
     AWS.config.update({ region });
 
@@ -33,17 +32,30 @@ class ImageController {
       // use file temp path to create a buffer
       const buffer = await fs.promises.readFile(file.tmpPath);
 
-      const { Location: url } = await s3
-        .upload({
-          Key: file.clientName,
+      const key = file.clientName;
+
+      await s3
+        .putObject({
+          Key: key,
           Bucket: bucket,
           Body: buffer,
-          ACL: "public-read",
         })
         .promise();
 
+      const signingParams = {
+        keypairId: Env.get("AWS_CLOUDFRONT_ACCESS_KEY_ID"),
+        privateKeyString: Env.get("AWS_CLOUDFRONT_PRIVATE_KEY"),
+        expireTime: 31556926000, // 31556926000 = 1 year from now, configure as needed
+      };
+
+      const url = awsCloudFrontSigner.getSignedUrl(
+        Env.get("AWS_CLOUDFRONT_URL_PREFIX") + key,
+        signingParams
+      );
+
       response.status(200).send({ url });
-    } catch {
+    } catch (err) {
+      console.error(err.message);
       response.status(500).send({ error: "Error uploading image" });
     }
   }
