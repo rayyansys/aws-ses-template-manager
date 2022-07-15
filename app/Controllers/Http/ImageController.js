@@ -27,7 +27,7 @@ class ImageController {
 
     try {
       // get bucket name from environment variables
-      const bucket = Env.get("AWS_BUCKET_NAME");
+      const bucket = Env.get("AWS_S3_BUCKET_NAME");
 
       const file = request.file("file");
       // use file temp path to create a buffer
