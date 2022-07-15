@@ -16,6 +16,51 @@ function listenToCodeMirror() {
   }
 }
 
+function onUploadImageClick(e) {
+  $('#selectedImage').click();
+  e.preventDefault();
+}
+
+// When the uploadImage input is changed, upload the new image right away
+function onUploadImageChange({ target: { files } }) {
+  const formData = new FormData();
+
+  if (files.length === 0) {
+    $("#errContainer")
+      .html("No files found. Please select a file.")
+      .removeClass("d-none");
+  }
+
+  formData.append("file", files[0]);
+  formData.append("region", localStorage.getItem("region"));
+
+  $.ajax({
+    type: "POST",
+    url: "/upload-image",
+    data: formData,
+    contentType: false,
+    processData: false,
+
+    success: function ({ url }) {
+      const editor = window.codeMirrorEditor;
+
+      editor.replaceSelection(`<img src="${url}" alt="">`);
+    },
+
+    error: function (xhr) {
+      let content;
+
+      if (xhr.responseJSON.message) {
+        content = xhr.responseJSON.message;
+      } else {
+        content = "Error uploading image. Please try again.";
+      }
+
+      $("#errContainer").html(content).removeClass("d-none");
+    },
+  });
+}
+
 function populateTextSectionContent() {
   //Will strip template html of html tags leaving inner content for the template text field
   const htmlString = window.codeMirrorEditor.getValue().trim();
@@ -60,5 +105,8 @@ function populateTextSectionContent() {
     }
 
     listenToCodeMirror();
+
+    $("#uploadImage").click(onUploadImageClick);
+    $("#selectedImage").change(onUploadImageChange);
   });
 })();
