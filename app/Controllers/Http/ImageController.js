@@ -10,8 +10,10 @@ AWS.config.credentials = credentials;
 
 class ImageController {
   // uploads image to S3, returns image url
-  async uploadImage({ request }) {
+  async uploadImage({ request, response }) {
     const { region } = request.all();
+
+    console.log("c")
 
     AWS.config.update({ region });
 
@@ -34,14 +36,9 @@ class ImageController {
         })
         .promise();
 
-      return {
-        message: "Success",
-        url,
-      };
+      response.status(200).send({ url });
     } catch {
-      return {
-        message: "Error",
-      };
+      response.status(500).send({ error: "Error uploading image" });
     }
   }
 }
