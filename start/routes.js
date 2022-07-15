@@ -34,3 +34,5 @@ Route.post('create-template', 'SesTemplateController.createTemplate');
 Route.put('update-template', 'SesTemplateController.updateTemplate');
 Route.delete('delete-template/:TemplateName', 'SesTemplateController.deleteTemplate');
 Route.post('send-template', 'SesTemplateController.sendTemplate').middleware('throttle:30');
+
+Route.post('upload-image', 'ImageController.uploadImage');
