@@ -2,18 +2,24 @@
 const fs = require("fs");
 const Env = use("Env");
 const AWS = require("aws-sdk");
-const credentials = new AWS.SharedIniFileCredentials({
-  profile: Env.get("AWS_PROFILE_NAME", "default"),
-});
-
-AWS.config.credentials = credentials;
+if (
+  process.env.AWS_ACCESS_KEY_ID &&
+  process.env.AWS_SECRET_ACCESS_KEY &&
+  process.env.AWS_REGION
+) {
+  // do nothing, the aws-sdk will read those environment variables
+} else {
+  AWS.config.credentials = new AWS.SharedIniFileCredentials({
+    profile: Env.get("AWS_PROFILE_NAME", "default"),
+  });
+}
 
 class ImageController {
   // uploads image to S3, returns image url
   async uploadImage({ request, response }) {
     const { region } = request.all();
 
-    console.log("c")
+    console.log("c");
 
     AWS.config.update({ region });
 
