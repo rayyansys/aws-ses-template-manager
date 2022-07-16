@@ -9,12 +9,13 @@ const onCodeMirrorChange = (editor) => {
   // get variables enclosed with {} from editor
   const variables =
     editor.getValue().match(/(?<=\{)[A-Za-z]+[a-zA-Z0-9]*(?=\})/g) || [];
+
   const fillVars = JSON.parse(
     window.fillVarsCodeMirrorEditor.getValue() || "{}"
   );
 
   const newFillVars = `{\n  ${variables
-    .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
+    .map((variable) => `"${variable}": "${fillVars[variable] || "{}"}"`)
     .join(",\n  ")}\n}`;
 
   // set fill vars json
@@ -24,7 +25,7 @@ const onCodeMirrorChange = (editor) => {
 
   setTimeout(() => {
     onFillVarsSave();
-  }, 250);
+  }, 1);
 };
 
 const onFillVarsChange = (editor) => {
