@@ -1,23 +1,92 @@
 const currentVersion = "v1.5.4";
 
+let previousFillVars = "";
+
 // updates email Live Preview
-const onCodeMirrorInputRead = (editor) => {
+const onCodeMirrorChange = (editor) => {
   $("#templatePreview").attr("srcDoc", editor.getValue());
+
+  // get variables enclosed with {} from editor
+  const variables =
+    editor.getValue().match(/(?<=\{)[A-Za-z]+[a-zA-Z0-9]*(?=\})/g) || [];
+  const fillVars = JSON.parse(
+    window.fillVarsCodeMirrorEditor.getValue() || "{}"
+  );
+
+  const newFillVars = `{\n  ${variables
+    .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
+    .join(",\n  ")}\n}`;
+
+  // set fill vars json
+  window.fillVarsCodeMirrorEditor.setValue(newFillVars);
+
+  previousFillVars = fillVars;
+
+  setTimeout(() => {
+    onFillVarsSave();
+  }, 250);
+};
+
+const onFillVarsChange = (editor) => {
+  const fillVars = editor.getValue();
+
+  const parsedVariables = JSON.parse(fillVars);
+
+  let newPreviewContent = window.codeMirrorEditor.getValue();
+
+  for (const variable in parsedVariables) {
+    newPreviewContent = newPreviewContent.replaceAll(
+      new RegExp(`{${variable}}`, "g"),
+      parsedVariables[variable]
+    );
+  }
+
+  // don't set content yet, wait for save-changes to be clicked
+  $("#templatePreview").attr("data-srcDoc", newPreviewContent);
+};
+
+const onFillVarsSave = () => {
+  previousFillVars = window.fillVarsCodeMirrorEditor.getValue();
+
+  $("#templatePreview").attr(
+    "srcDoc",
+    $("#templatePreview").attr("data-srcDoc")
+  );
+
+  $("#fillVarsModal").modal("hide");
+
+  // refresh after timeout to make sure content is updated
+  setTimeout(() => {
+    window.fillVarsCodeMirrorEditor.refresh();
+  }, 250);
+};
+
+const onFillVarsClose = () => {
+  $("#templatePreview").attr("data-srcDoc", "");
+
+  window.fillVarsCodeMirrorEditor.setValue(previousFillVars);
+
+  // refresh after timeout to make sure content is updated
+  setTimeout(() => {
+    window.fillVarsCodeMirrorEditor.refresh();
+  }, 250);
 };
 
 // contributor's defined global variable "window.codeMirrorEditor" wont be available right away, so we need to wait for it to be available
 function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
+  const varsEditor = window.fillVarsCodeMirrorEditor;
 
-  if (typeof editor !== "undefined") {
-    editor.on("change", onCodeMirrorInputRead);
+  if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
+    editor.on("change", onCodeMirrorChange);
+    varsEditor.on("change", onFillVarsChange);
   } else {
     setTimeout(listenToCodeMirror, 250);
   }
 }
 
 function onUploadImageClick(e) {
-  $('#selectedImage').click();
+  $("#selectedImage").click();
   e.preventDefault();
 }
 
@@ -64,35 +133,42 @@ function onUploadImageChange({ target: { files } }) {
 function populateTextSectionContent() {
   //Will strip template html of html tags leaving inner content for the template text field
   const htmlString = window.codeMirrorEditor.getValue().trim();
-  const textContent = $(htmlString).not('style').text().replace(/\s\s+/g, ' ').trim();
-  const $templateText = $('#templateText');
+  const textContent = $(htmlString)
+    .not("style")
+    .text()
+    .replace(/\s\s+/g, " ")
+    .trim();
+  const $templateText = $("#templateText");
   $templateText.val(textContent);
-  $templateText.trigger('input'); // we need this event triggered to enable the update button (just as if someone was to type in this input).
+  $templateText.trigger("input"); // we need this event triggered to enable the update button (just as if someone was to type in this input).
 }
 
 (async function () {
-  const versionChecked = sessionStorage.getItem('versionChecked');
+  const versionChecked = sessionStorage.getItem("versionChecked");
   if (!versionChecked) {
-    await $.get(`https://api.github.com/repos/MattRuddick/aws-ses-template-manager/tags`, (response) => {
-      try {
-        const latestVersion = response[0].name;
-        if (currentVersion !== latestVersion) {
-          sessionStorage.setItem('versionOutdated', 'true');
-          sessionStorage.setItem('latestVersion', latestVersion);
+    await $.get(
+      `https://api.github.com/repos/MattRuddick/aws-ses-template-manager/tags`,
+      (response) => {
+        try {
+          const latestVersion = response[0].name;
+          if (currentVersion !== latestVersion) {
+            sessionStorage.setItem("versionOutdated", "true");
+            sessionStorage.setItem("latestVersion", latestVersion);
+          }
+        } catch {
+          console.warn("App version could not be checked.");
         }
-      } catch {
-        console.warn('App version could not be checked.');
       }
-    }).always(() => {
+    ).always(() => {
       // still mark versionCheck as done even if request failed. failsafe should the repo/url/git endpoint structure change in the future
-      sessionStorage.setItem('versionChecked', 'true'); // indicates we have already checked the version
+      sessionStorage.setItem("versionChecked", "true"); // indicates we have already checked the version
     });
   }
 
   $(document).ready(function () {
-    if (sessionStorage.getItem('versionOutdated')) {
-      const latestVersion = sessionStorage.getItem('latestVersion');
-      $('body').append(`
+    if (sessionStorage.getItem("versionOutdated")) {
+      const latestVersion = sessionStorage.getItem("latestVersion");
+      $("body").append(`
         <a id="newVersionIndicator" href="https://github.com/MattRuddick/aws-ses-template-manager/releases/tag/${latestVersion}" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<code>git pull</code> for latest version">
           New Version Available
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-download position-absolute" viewBox="0 0 16 16">
@@ -108,5 +184,8 @@ function populateTextSectionContent() {
 
     $("#uploadImage").click(onUploadImageClick);
     $("#selectedImage").change(onUploadImageChange);
+    $("#fillVariablesSave").click(onFillVarsSave);
+    $("#fillVariablesClose").click(onFillVarsClose);
+    $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
   });
 })();

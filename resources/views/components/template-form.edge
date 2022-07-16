@@ -2,28 +2,62 @@
   <div class="form-group">
     <label for="templateName">Template Name</label>
     <small class="form-text text-muted float-right">This value cannot be changed when editing this template</small>
-    <input type="text" class="form-control" id="templateName" placeholder="Template Name" {{ id === 'updateTemplateForm' ? 'disabled' : ''}}>
-    <small class="form-text text-muted">The name of the template. When you send the email, you refer to this name.</small>
+    <input type="text" class="form-control" id="templateName" placeholder="Template Name" {{ id==='updateTemplateForm'
+      ? 'disabled' : '' }}>
+    <small class="form-text text-muted">The name of the template. When you send the email, you refer to this
+      name.</small>
   </div>
   <div class="form-group">
     <label for="templateSubject">Subject</label>
     <input type="text" class="form-control" id="templateSubject" placeholder="Subject" required>
-    <small class="form-text text-muted">The subject line of the email. This property may contain replacement tags.</small>
+    <small class="form-text text-muted">The subject line of the email. This property may contain replacement
+      tags.</small>
   </div>
   <div class="form-group">
     <label for="templateText">Text</label>
     <a href="javascript:;" onclick="populateTextSectionContent()" class="float-right">Generate Content</a>
     <textarea class="form-control" id="templateText" placeholder="Text"></textarea>
-    <small class="form-text text-muted">The text body of the email. Recipients whose email clients don't display HTML email see this version of the email. This property may contain replacement tags.</small>
+    <small class="form-text text-muted">The text body of the email. Recipients whose email clients don't display HTML
+      email see this version of the email. This property may contain replacement tags.</small>
   </div>
   <div class="form-group">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex">
       <label for="templateHtml">Html</label>
-      
-      <input type="file" id="selectedImage" style="display: none;" accept="image/png, image/jpeg" />
-      <button id="uploadImage" class="btn btn-primary mb-1" aria-label="Upload File">
-        <i class="fas fa-image fa-lg"></i> Upload Image
-      </button>
+
+
+      <div class="d-flex ml-auto mb-1">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#fillVarsModal">
+          <i class="fa-solid fa-lg fa-fill"></i>
+          Fill Variables
+        </button>
+
+        <div class="modal fade" id="fillVarsModal" tabindex="-1" role="dialog" aria-labelledby="fillVarsModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="fillVarsModalLabel">Fill Variables</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <textarea id="fillVarsCodeMirror"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button id="fillVariablesClose" type="button" class="btn btn-secondary"
+                  data-dismiss="modal">Close</button>
+                <button id="fillVariablesSave" type="button" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <input type="file" id="selectedImage" style="display: none;" accept="image/png, image/jpeg" />
+        <button id="uploadImage" class="btn btn-primary ml-1" aria-label="Upload File">
+          <i class="fas fa-image fa-lg"></i> Upload Image
+        </button>
+      </div>
     </div>
 
     <textarea id="codeMirror"></textarea>
