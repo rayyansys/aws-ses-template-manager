@@ -45,7 +45,7 @@ class ImageController {
       const signingParams = {
         keypairId: Env.get("AWS_CLOUDFRONT_ACCESS_KEY_ID"),
         privateKeyString: Env.get("AWS_CLOUDFRONT_PRIVATE_KEY"),
-        expireTime: 31556926000, // 31556926000 = 1 year from now, configure as needed
+        expireTime: 1704070800000, // 2024-01-01
       };
 
       const url = awsCloudFrontSigner.getSignedUrl(
