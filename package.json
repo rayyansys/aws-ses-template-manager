@@ -22,7 +22,8 @@
     "@adonisjs/framework": "^5.0.9",
     "@adonisjs/ignitor": "^2.0.8",
     "adonis-throttle": "^2.3.6",
-    "aws-sdk": "^2.742.0"
+    "aws-sdk": "^2.742.0",
+    "uuidv4": "^6.2.13"
   },
   "autoload": {
     "App": "./app"

@@ -2,6 +2,8 @@
 const fs = require("fs");
 const Env = use("Env");
 const AWS = require("aws-sdk");
+const { uuid: uuid4 } = require("uuidv4");
+
 if (
   process.env.AWS_ACCESS_KEY_ID &&
   process.env.AWS_SECRET_ACCESS_KEY &&
@@ -31,7 +33,7 @@ class ImageController {
       // use file temp path to create a buffer
       const buffer = await fs.promises.readFile(file.tmpPath);
 
-      const key = file.clientName;
+      const key = `${uuid4()}/${file.clientName}`;
 
       await s3
         .putObject({
