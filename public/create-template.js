@@ -19,10 +19,6 @@ $(document).ready(function () {
     }
   );
 
-  setInterval(() => {
-    window.fillVarsCodeMirrorEditor.refresh(); //must be called to re-draw the code editor
-  }, 100);
-
   if (urlParams.has("d-origin")) {
     // we need to load the existing template from which we will duplicate
     $.get(

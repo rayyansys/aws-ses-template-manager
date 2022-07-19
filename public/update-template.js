@@ -22,10 +22,6 @@ $(document).ready(() => {
     }
   );
 
-  setInterval(() => {
-    window.fillVarsCodeMirrorEditor.refresh(); //must be called to re-draw the code editor
-  }, 100);
-
   $.get(
     `/get-template/${templateName}?region=${localStorage.getItem("region")}`,
     function (response) {

@@ -55,22 +55,16 @@ const onFillVarsSave = () => {
   );
 
   $("#fillVarsModal").modal("hide");
+};
 
-  // refresh after timeout to make sure content is updated
-  setTimeout(() => {
-    window.fillVarsCodeMirrorEditor.refresh();
-  }, 250);
+const onFillVarsOpen = () => {
+  this.fillVarsCodeMirrorEditor.refresh();
 };
 
 const onFillVarsClose = () => {
   $("#templatePreview").attr("data-srcDoc", "");
 
   window.fillVarsCodeMirrorEditor.setValue(previousFillVars);
-
-  // refresh after timeout to make sure content is updated
-  setTimeout(() => {
-    window.fillVarsCodeMirrorEditor.refresh();
-  }, 250);
 };
 
 // contributor's defined global variable "window.codeMirrorEditor" wont be available right away, so we need to wait for it to be available
@@ -188,5 +182,6 @@ function populateTextSectionContent() {
     $("#fillVariablesSave").click(onFillVarsSave);
     $("#fillVariablesClose").click(onFillVarsClose);
     $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
+    $("#fillVarsModal").on("shown.bs.modal", onFillVarsOpen);
   });
 })();
