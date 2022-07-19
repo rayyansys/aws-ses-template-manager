@@ -6,8 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node ace test",
-    "prepare": "husky install"
+    "test": "node ace test"
   },
   "keywords": [
     "adonisjs",
@@ -28,8 +27,5 @@
   },
   "autoload": {
     "App": "./app"
-  },
-  "devDependencies": {
-    "husky": "^7.0.0"
   }
 }
