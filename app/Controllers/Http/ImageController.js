@@ -13,7 +13,6 @@ if (
     profile: Env.get("AWS_PROFILE_NAME", "default"),
   });
 }
-const awsCloudFrontSigner = require("aws-cloudfront-sign");
 
 class ImageController {
   // uploads image to S3, returns image url
@@ -42,17 +41,7 @@ class ImageController {
         })
         .promise();
 
-      const signingParams = {
-        keypairId: Env.get("AWS_CLOUDFRONT_ACCESS_KEY_ID"),
-        privateKeyString: Env.get("AWS_CLOUDFRONT_PRIVATE_KEY"),
-        expireTime: 1704070800000, // 2024-01-01
-      };
-
-      const url = awsCloudFrontSigner.getSignedUrl(
-        Env.get("AWS_CLOUDFRONT_URL_PREFIX") + key,
-        signingParams
-      );
-
+      const url = `${Env.get("IMAGES_CDN_URL_PREFIX")}${key}`;
       response.status(200).send({ url });
     } catch (err) {
       console.error(err.message);
