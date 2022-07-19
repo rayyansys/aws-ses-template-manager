@@ -2,7 +2,7 @@
 const fs = require("fs");
 const Env = use("Env");
 const AWS = require("aws-sdk");
-const { uuid: uuid4 } = require("uuidv4");
+const { v4: uuid4 } = require("uuid");
 
 if (
   process.env.AWS_ACCESS_KEY_ID &&
