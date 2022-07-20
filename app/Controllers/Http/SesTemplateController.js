@@ -1,19 +1,11 @@
 "use strict";
-const Env = use("Env");
 const AWS = require("aws-sdk");
-if (
-  process.env.AWS_ACCESS_KEY_ID &&
-  process.env.AWS_SECRET_ACCESS_KEY &&
-  process.env.AWS_REGION
-) {
-  // do nothing, the aws-sdk will read those environment variables
-} else {
-  AWS.config.credentials = new AWS.SharedIniFileCredentials({
-    profile: Env.get("AWS_PROFILE_NAME", "default"),
-  });
-}
 
 class SesTemplateController {
+  static get inject() {
+    require("../../Common/Credentials");
+  }
+
   getDynamicFields(contentStr) {
     // a helper function which will convert a string into an array of any mustache dynamic fields
     let dynamicFieldsArr = [];
