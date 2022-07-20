@@ -1,18 +1,15 @@
 $(document).ready(() => {
   const urlParams = new URLSearchParams(window.location.search);
-  const templateName = urlParams.get("name");
+  const templateName = urlParams.get('name');
 
   if (!templateName) {
-    window.location.href = "/"; //something went wrong
+    window.location.href = '/'; //something went wrong
   }
 
-  window.codeMirrorEditor = window.CodeMirror.fromTextArea(
-    document.querySelector("#codeMirror"),
-    {
-      mode: "htmlmixed",
-      lineNumbers: true,
-    }
-  );
+  window.codeMirrorEditor = window.CodeMirror.fromTextArea(document.querySelector('#codeMirror'), {
+    mode: "htmlmixed",
+    lineNumbers: true
+  });
 
   window.fillVarsCodeMirrorEditor = window.CodeMirror.fromTextArea(
     document.querySelector("#fillVarsCodeMirror"),
@@ -22,56 +19,49 @@ $(document).ready(() => {
     }
   );
 
-  setInterval(() => {
-    window.fillVarsCodeMirrorEditor.refresh(); //must be called to re-draw the code editor
-  }, 100);
+  $.get(`/get-template/${templateName}?region=${localStorage.getItem('region')}`, function (response) {
+    $('#templateName').val(response.data.TemplateName);
+    $('#templateSubject').val(response.data.SubjectPart);
+    $('#templateText').val(response.data.TextPart);
 
-  $.get(
-    `/get-template/${templateName}?region=${localStorage.getItem("region")}`,
-    function (response) {
-      $("#templateName").val(response.data.TemplateName);
-      $("#templateSubject").val(response.data.SubjectPart);
-      $("#templateText").val(response.data.TextPart);
+    window.codeMirrorEditor.setValue(response.data.HtmlPart ? response.data.HtmlPart : "");
 
-      window.codeMirrorEditor.setValue(
-        response.data.HtmlPart ? response.data.HtmlPart : ""
-      );
-
-      $("#updateTemplateForm").removeClass("d-none"); //show the form only when we have pre-populated all inputs
-      window.codeMirrorEditor.refresh(); //must be called to re draw the code editor
-    }
-  );
-
-  $("#updateTemplateForm").on("input", () => {
-    $("#updateTemplateForm button").attr("disabled", false);
+    $('#updateTemplateForm').removeClass('d-none'); //show the form only when we have pre-populated all inputs
+    window.codeMirrorEditor.refresh();  //must be called to re draw the code editor
   });
 
-  $("#updateTemplateForm").submit(function (e) {
+  $('#updateTemplateForm').on('input', () => {
+    $('#updateTemplateForm button').attr('disabled', false);
+  });
+
+
+  $('#updateTemplateForm').submit(function(e){
     e.preventDefault();
     const putPayload = {
-      TemplateName: $("#templateName").val(),
-      HtmlPart: window.codeMirrorEditor.getValue(),
-      SubjectPart: $("#templateSubject").val(),
-      TextPart: $("#templateText").val(),
-      region: localStorage.getItem("region"),
+      "TemplateName": $('#templateName').val(),
+      "HtmlPart": window.codeMirrorEditor.getValue(),
+      "SubjectPart": $('#templateSubject').val(),
+      "TextPart": $('#templateText').val(),
+      "region": localStorage.getItem('region')
     };
 
     $.ajax({
       url: `/update-template`,
-      type: "PUT",
+      type: 'PUT',
       data: putPayload,
-      success: function () {
-        window.location.href = "/";
+      success: function() {
+        window.location.href = '/';
       },
-      error: function (xhr) {
+      error: function(xhr) {
         let content;
         if (xhr.responseJSON.message) {
           content = xhr.responseJSON.message;
         } else {
           content = "Error updating template. Please try again";
         }
-        $("#errContainer").html(content).removeClass("d-none");
-      },
+        $('#errContainer').html(content).removeClass('d-none');
+      }
     });
   });
+
 });

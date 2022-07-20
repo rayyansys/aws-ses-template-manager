@@ -1,15 +1,13 @@
-$(document).ready(function () {
+$(document).ready(function(){
+
   // check to see if the template we're creating is a duplicate of an existing template
   const urlParams = new URLSearchParams(window.location.search);
-  window.history.replaceState({}, document.title, "/create-template"); // clean the url search params from the URL
+  window.history.replaceState({}, document.title, "/create-template");  // clean the url search params from the URL
 
-  window.codeMirrorEditor = window.CodeMirror.fromTextArea(
-    document.querySelector("#codeMirror"),
-    {
-      mode: "htmlmixed",
-      lineNumbers: true,
-    }
-  );
+  window.codeMirrorEditor = window.CodeMirror.fromTextArea(document.querySelector('#codeMirror'), {
+    mode: "htmlmixed",
+    lineNumbers: true
+  });
 
   window.fillVarsCodeMirrorEditor = window.CodeMirror.fromTextArea(
     document.querySelector("#fillVarsCodeMirror"),
@@ -19,61 +17,51 @@ $(document).ready(function () {
     }
   );
 
-  setInterval(() => {
-    window.fillVarsCodeMirrorEditor.refresh(); //must be called to re-draw the code editor
-  }, 100);
-
-  if (urlParams.has("d-origin")) {
+  if (urlParams.has('d-origin')) {
     // we need to load the existing template from which we will duplicate
-    $.get(
-      `/get-template/${urlParams.get("d-origin")}?region=${localStorage.getItem(
-        "region"
-      )}`,
-      function (response) {
-        $("#templateName").val(urlParams.get("d-name"));
-        $("#templateSubject").val(response.data.SubjectPart);
-        $("#templateText").val(response.data.TextPart);
-        window.codeMirrorEditor.setValue(
-          response.data.HtmlPart ? response.data.HtmlPart : ""
-        );
-        $("#createTemplateForm").trigger("change"); //enable the save button
-      }
-    );
+    $.get(`/get-template/${urlParams.get('d-origin')}?region=${localStorage.getItem('region')}`, function (response) {
+      $('#templateName').val(urlParams.get('d-name'));
+      $('#templateSubject').val(response.data.SubjectPart);
+      $('#templateText').val(response.data.TextPart);
+      window.codeMirrorEditor.setValue(response.data.HtmlPart ? response.data.HtmlPart : "");
+      $('#createTemplateForm').trigger('change'); //enable the save button
+    });
   }
 
   // observe any changes to the form. If so, then enable the create btn
-  $("#createTemplateForm").on("input", () => {
-    $("#createTemplateForm button").attr("disabled", false);
+  $('#createTemplateForm').on('input', () => {
+    $('#createTemplateForm button').attr('disabled', false);
   });
 
   // handle form submissions
-  $("#createTemplateForm").submit(function (e) {
+  $('#createTemplateForm').submit(function(e) {
     e.preventDefault();
 
     const createPayload = {
-      TemplateName: $("#templateName").val(),
-      HtmlPart: window.codeMirrorEditor.getValue(),
-      SubjectPart: $("#templateSubject").val(),
-      TextPart: $("#templateText").val(),
-      region: localStorage.getItem("region"),
+      "TemplateName": $('#templateName').val(),
+      "HtmlPart": window.codeMirrorEditor.getValue(),
+      "SubjectPart": $('#templateSubject').val(),
+      "TextPart": $('#templateText').val(),
+      "region": localStorage.getItem('region')
     };
 
     $.ajax({
       type: "POST",
       url: "/create-template",
       data: createPayload,
-      success: function () {
-        window.location.href = "/";
+      success: function() {
+        window.location.href = '/';
       },
-      error: function (xhr) {
+      error: function(xhr) {
         let content;
         if (xhr.responseJSON.message) {
           content = xhr.responseJSON.message;
         } else {
           content = "Error saving template. Please try again";
         }
-        $("#errContainer").html(content).removeClass("d-none");
-      },
+        $('#errContainer').html(content).removeClass('d-none');
+      }
     });
   });
+
 });
