@@ -28,6 +28,10 @@ const onCodeMirrorChange = (editor) => {
   }, 1);
 };
 
+const onFillVarsOpen = () => {
+  this.fillVarsCodeMirrorEditor.refresh();
+};
+
 const onFillVarsChange = (editor) => {
   const fillVars = editor.getValue();
 
@@ -188,5 +192,6 @@ function populateTextSectionContent() {
     $("#fillVariablesSave").click(onFillVarsSave);
     $("#fillVariablesClose").click(onFillVarsClose);
     $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
+    $("#fillVarsModal").on("shown.bs.modal", onFillVarsOpen);
   });
 })();
