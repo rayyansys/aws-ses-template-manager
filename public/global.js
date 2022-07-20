@@ -138,42 +138,35 @@ function onUploadImageChange({ target: { files } }) {
 function populateTextSectionContent() {
   //Will strip template html of html tags leaving inner content for the template text field
   const htmlString = window.codeMirrorEditor.getValue().trim();
-  const textContent = $(htmlString)
-    .not("style")
-    .text()
-    .replace(/\s\s+/g, " ")
-    .trim();
-  const $templateText = $("#templateText");
+  const textContent = $(htmlString).not('style').text().replace(/\s\s+/g, ' ').trim();
+  const $templateText = $('#templateText');
   $templateText.val(textContent);
-  $templateText.trigger("input"); // we need this event triggered to enable the update button (just as if someone was to type in this input).
+  $templateText.trigger('input'); // we need this event triggered to enable the update button (just as if someone was to type in this input).
 }
 
 (async function () {
-  const versionChecked = sessionStorage.getItem("versionChecked");
+  const versionChecked = sessionStorage.getItem('versionChecked');
   if (!versionChecked) {
-    await $.get(
-      `https://api.github.com/repos/MattRuddick/aws-ses-template-manager/tags`,
-      (response) => {
-        try {
-          const latestVersion = response[0].name;
-          if (currentVersion !== latestVersion) {
-            sessionStorage.setItem("versionOutdated", "true");
-            sessionStorage.setItem("latestVersion", latestVersion);
-          }
-        } catch {
-          console.warn("App version could not be checked.");
+    await $.get(`https://api.github.com/repos/MattRuddick/aws-ses-template-manager/tags`, (response) => {
+      try {
+        const latestVersion = response[0].name;
+        if (currentVersion !== latestVersion) {
+          sessionStorage.setItem('versionOutdated', 'true');
+          sessionStorage.setItem('latestVersion', latestVersion);
         }
+      } catch {
+        console.warn('App version could not be checked.');
       }
-    ).always(() => {
+    }).always(() => {
       // still mark versionCheck as done even if request failed. failsafe should the repo/url/git endpoint structure change in the future
-      sessionStorage.setItem("versionChecked", "true"); // indicates we have already checked the version
+      sessionStorage.setItem('versionChecked', 'true'); // indicates we have already checked the version
     });
   }
 
   $(document).ready(function () {
-    if (sessionStorage.getItem("versionOutdated")) {
-      const latestVersion = sessionStorage.getItem("latestVersion");
-      $("body").append(`
+    if (sessionStorage.getItem('versionOutdated')) {
+      const latestVersion = sessionStorage.getItem('latestVersion');
+      $('body').append(`
         <a id="newVersionIndicator" href="https://github.com/MattRuddick/aws-ses-template-manager/releases/tag/${latestVersion}" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<code>git pull</code> for latest version">
           New Version Available
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-download position-absolute" viewBox="0 0 16 16">
