@@ -1,19 +1,26 @@
 const currentVersion = "v1.5.4";
 
-let previousFillVars = "";
+let previousFillVarsText = "";
+let templateName = "";
+
+const parseJSONText = (jsonText) => {
+  return JSON.parse(jsonText || "{}");
+}
 
 // updates email Live Preview
 const onCodeMirrorChange = (editor) => {
+  
   $("#templatePreview").attr("srcDoc", editor.getValue());
 
   // get variables enclosed with {} from editor
-  const variables =
+  let variables =
     editor.getValue().match(/(?<=\{{2})[A-Za-z_]+[a-zA-Z0-9_f]*(?=\}{2})/g) || [];
-
-  const fillVars = JSON.parse(
-    window.fillVarsCodeMirrorEditor.getValue() || "{}"
+  
+  const fillVars = parseJSONText(
+    window.fillVarsCodeMirrorEditor.getValue()
   );
 
+  
   const newFillVars = `{\n  ${variables
     .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
     .join(",\n  ")}\n}`;
@@ -21,7 +28,7 @@ const onCodeMirrorChange = (editor) => {
   // set fill vars json
   window.fillVarsCodeMirrorEditor.setValue(newFillVars);
 
-  previousFillVars = fillVars;
+  previousFillVarsText = fillVars;
 
   setTimeout(() => {
     onFillVarsSave();
@@ -51,7 +58,19 @@ const onFillVarsChange = (editor) => {
 };
 
 const onFillVarsSave = () => {
-  previousFillVars = window.fillVarsCodeMirrorEditor.getValue();
+  previousFillVarsText = window.fillVarsCodeMirrorEditor.getValue()
+  
+  const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
+
+  const newLcFillVars = {
+    ...lcFillVars,
+    [templateName]: {
+      ...lcFillVars[templateName],
+      ...parseJSONText(previousFillVarsText)
+    }
+  };
+
+  localStorage.setItem("fillVars", JSON.stringify(newLcFillVars));
 
   $("#templatePreview").attr(
     "srcDoc",
@@ -69,7 +88,7 @@ const onFillVarsSave = () => {
 const onFillVarsClose = () => {
   $("#templatePreview").attr("data-srcDoc", "");
 
-  window.fillVarsCodeMirrorEditor.setValue(previousFillVars);
+  window.fillVarsCodeMirrorEditor.setValue(previousFillVarsText || "{\n  \n}");
 
   // refresh after timeout to make sure content is updated
   setTimeout(() => {
@@ -83,8 +102,15 @@ function listenToCodeMirror() {
   const varsEditor = window.fillVarsCodeMirrorEditor;
 
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
+    // restore previous fillVars for this template
+    const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
+    const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
+    
     editor.on("change", onCodeMirrorChange);
     varsEditor.on("change", onFillVarsChange);
+
+    window.fillVarsCodeMirrorEditor.setValue(newFillVarsText);
+
   } else {
     setTimeout(listenToCodeMirror, 250);
   }
@@ -106,7 +132,7 @@ function onUploadImageChange({ target: { files } }) {
   }
 
   formData.append("file", files[0]);
-  formData.append("region", localStorage.getItem("region"));
+  formData.append("region", localStorage.getItemItem("region"));
 
   $.ajax({
     type: "POST",
@@ -179,6 +205,9 @@ function populateTextSectionContent() {
     }
 
     listenToCodeMirror();
+
+    // get template name from window query string "name"
+    templateName = window.location.search.split("name=")[1];
 
     $("#uploadImage").click(onUploadImageClick);
     $("#selectedImage").change(onUploadImageChange);
