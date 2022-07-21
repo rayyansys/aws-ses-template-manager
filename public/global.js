@@ -8,14 +8,14 @@ const onCodeMirrorChange = (editor) => {
 
   // get variables enclosed with {} from editor
   const variables =
-    editor.getValue().match(/(?<=\{)[A-Za-z]+[a-zA-Z0-9]*(?=\})/g) || [];
+    editor.getValue().match(/(?<=\{{2})[A-Za-z]+[a-zA-Z0-9]*(?=\}{2})/g) || [];
 
   const fillVars = JSON.parse(
     window.fillVarsCodeMirrorEditor.getValue() || "{}"
   );
 
   const newFillVars = `{\n  ${variables
-    .map((variable) => `"${variable}": "${fillVars[variable] || "{}"}"`)
+    .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
     .join(",\n  ")}\n}`;
 
   // set fill vars json
@@ -41,7 +41,7 @@ const onFillVarsChange = (editor) => {
 
   for (const variable in parsedVariables) {
     newPreviewContent = newPreviewContent.replaceAll(
-      new RegExp(`{${variable}}`, "g"),
+      new RegExp(`{{${variable}}}`, "g"),
       parsedVariables[variable]
     );
   }
