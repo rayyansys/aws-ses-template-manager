@@ -8,7 +8,7 @@ const onCodeMirrorChange = (editor) => {
 
   // get variables enclosed with {} from editor
   const variables =
-    editor.getValue().match(/(?<=\{{2})[A-Za-z]+[a-zA-Z0-9]*(?=\}{2})/g) || [];
+    editor.getValue().match(/(?<=\{{2})[A-Za-z_]+[a-zA-Z0-9_f]*(?=\}{2})/g) || [];
 
   const fillVars = JSON.parse(
     window.fillVarsCodeMirrorEditor.getValue() || "{}"
