@@ -25,7 +25,7 @@ class ImageController {
       // use file temp path to create a buffer
       const buffer = await fs.promises.readFile(file.tmpPath);
 
-      const key = `${uuid4()}/${file.clientName}`;
+      const key = `ses-images/${uuid4()}/${file.clientName}`;
 
       await s3
         .putObject({
