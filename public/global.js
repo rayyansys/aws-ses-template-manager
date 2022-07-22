@@ -9,18 +9,18 @@ const parseJSONText = (jsonText) => {
 
 // updates email Live Preview
 const onCodeMirrorChange = (editor) => {
-  
+
   $("#templatePreview").attr("srcDoc", editor.getValue());
 
   // get variables enclosed with {} from editor
   let variables =
     editor.getValue().match(/(?<=\{{2})[A-Za-z_]+[a-zA-Z0-9_f]*(?=\}{2})/g) || [];
-  
+
   const fillVars = parseJSONText(
     window.fillVarsCodeMirrorEditor.getValue()
   );
 
-  
+
   const newFillVars = `{\n  ${variables
     .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
     .join(",\n  ")}\n}`;
@@ -59,7 +59,7 @@ const onFillVarsChange = (editor) => {
 
 const onFillVarsSave = () => {
   previousFillVarsText = window.fillVarsCodeMirrorEditor.getValue()
-  
+
   const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
 
   const newLcFillVars = {
@@ -105,7 +105,7 @@ function listenToCodeMirror() {
     // restore previous fillVars for this template
     const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
-    
+
     editor.on("change", onCodeMirrorChange);
     varsEditor.on("change", onFillVarsChange);
 
@@ -132,7 +132,7 @@ function onUploadImageChange({ target: { files } }) {
   }
 
   formData.append("file", files[0]);
-  formData.append("region", localStorage.getItemItem("region"));
+  formData.append("region", localStorage.getItem("region"));
 
   $.ajax({
     type: "POST",
