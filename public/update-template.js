@@ -11,6 +11,14 @@ $(document).ready(() => {
     lineNumbers: true
   });
 
+  window.fillVarsCodeMirrorEditor = window.CodeMirror.fromTextArea(
+    document.querySelector("#fillVarsCodeMirror"),
+    {
+      mode: "application/json",
+      lineNumbers: true,
+    }
+  );
+
   $.get(`/get-template/${templateName}?region=${localStorage.getItem('region')}`, function (response) {
     $('#templateName').val(response.data.TemplateName);
     $('#templateSubject').val(response.data.SubjectPart);
@@ -57,4 +65,3 @@ $(document).ready(() => {
   });
 
 });
-

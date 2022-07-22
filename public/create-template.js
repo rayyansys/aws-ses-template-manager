@@ -9,6 +9,14 @@ $(document).ready(function(){
     lineNumbers: true
   });
 
+  window.fillVarsCodeMirrorEditor = window.CodeMirror.fromTextArea(
+    document.querySelector("#fillVarsCodeMirror"),
+    {
+      mode: "application/json",
+      lineNumbers: true,
+    }
+  );
+
   if (urlParams.has('d-origin')) {
     // we need to load the existing template from which we will duplicate
     $.get(`/get-template/${urlParams.get('d-origin')}?region=${localStorage.getItem('region')}`, function (response) {

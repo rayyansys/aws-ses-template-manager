@@ -1,5 +1,166 @@
 const currentVersion = "v1.5.4";
 
+let previousFillVarsText = "";
+let templateName = "";
+
+const parseJSONText = (jsonText) => {
+  return JSON.parse(jsonText || "{}");
+}
+
+// updates email Live Preview
+const onCodeMirrorChange = (editor) => {
+  
+  $("#templatePreview").attr("srcDoc", editor.getValue());
+
+  // get variables enclosed with {} from editor
+  let variables =
+    editor.getValue().match(/(?<=\{{2})[A-Za-z_]+[a-zA-Z0-9_f]*(?=\}{2})/g) || [];
+  
+  const fillVars = parseJSONText(
+    window.fillVarsCodeMirrorEditor.getValue()
+  );
+
+  
+  const newFillVars = `{\n  ${variables
+    .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
+    .join(",\n  ")}\n}`;
+
+  // set fill vars json
+  window.fillVarsCodeMirrorEditor.setValue(newFillVars);
+
+  previousFillVarsText = fillVars;
+
+  setTimeout(() => {
+    onFillVarsSave();
+  }, 1);
+};
+
+const onFillVarsOpen = () => {
+  this.fillVarsCodeMirrorEditor.refresh();
+};
+
+const onFillVarsChange = (editor) => {
+  const fillVars = editor.getValue();
+
+  const parsedVariables = JSON.parse(fillVars);
+
+  let newPreviewContent = window.codeMirrorEditor.getValue();
+
+  for (const variable in parsedVariables) {
+    newPreviewContent = newPreviewContent.replaceAll(
+      new RegExp(`{{${variable}}}`, "g"),
+      parsedVariables[variable]
+    );
+  }
+
+  // don't set content yet, wait for save-changes to be clicked
+  $("#templatePreview").attr("data-srcDoc", newPreviewContent);
+};
+
+const onFillVarsSave = () => {
+  previousFillVarsText = window.fillVarsCodeMirrorEditor.getValue()
+  
+  const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
+
+  const newLcFillVars = {
+    ...lcFillVars,
+    [templateName]: {
+      ...lcFillVars[templateName],
+      ...parseJSONText(previousFillVarsText)
+    }
+  };
+
+  localStorage.setItem("fillVars", JSON.stringify(newLcFillVars));
+
+  $("#templatePreview").attr(
+    "srcDoc",
+    $("#templatePreview").attr("data-srcDoc")
+  );
+
+  $("#fillVarsModal").modal("hide");
+
+  // refresh after timeout to make sure content is updated
+  setTimeout(() => {
+    window.fillVarsCodeMirrorEditor.refresh();
+  }, 250);
+};
+
+const onFillVarsClose = () => {
+  $("#templatePreview").attr("data-srcDoc", "");
+
+  window.fillVarsCodeMirrorEditor.setValue(previousFillVarsText || "{\n  \n}");
+
+  // refresh after timeout to make sure content is updated
+  setTimeout(() => {
+    window.fillVarsCodeMirrorEditor.refresh();
+  }, 250);
+};
+
+// contributor's defined global variable "window.codeMirrorEditor" wont be available right away, so we need to wait for it to be available
+function listenToCodeMirror() {
+  const editor = window.codeMirrorEditor;
+  const varsEditor = window.fillVarsCodeMirrorEditor;
+
+  if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
+    // restore previous fillVars for this template
+    const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
+    const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
+    
+    editor.on("change", onCodeMirrorChange);
+    varsEditor.on("change", onFillVarsChange);
+
+    window.fillVarsCodeMirrorEditor.setValue(newFillVarsText);
+
+  } else {
+    setTimeout(listenToCodeMirror, 250);
+  }
+}
+
+function onUploadImageClick(e) {
+  $("#selectedImage").click();
+  e.preventDefault();
+}
+
+// When the uploadImage input is changed, upload the new image right away
+function onUploadImageChange({ target: { files } }) {
+  const formData = new FormData();
+
+  if (files.length === 0) {
+    $("#errContainer")
+      .html("No files found. Please select a file.")
+      .removeClass("d-none");
+  }
+
+  formData.append("file", files[0]);
+  formData.append("region", localStorage.getItemItem("region"));
+
+  $.ajax({
+    type: "POST",
+    url: "/upload-image",
+    data: formData,
+    contentType: false,
+    processData: false,
+
+    success: function ({ url }) {
+      const editor = window.codeMirrorEditor;
+
+      editor.replaceSelection(`<img src="${url}" alt="">`);
+    },
+
+    error: function (xhr) {
+      let content;
+
+      if (xhr.responseJSON.message) {
+        content = xhr.responseJSON.message;
+      } else {
+        content = "Error uploading image. Please try again.";
+      }
+
+      $("#errContainer").html(content).removeClass("d-none");
+    },
+  });
+}
+
 function populateTextSectionContent() {
   //Will strip template html of html tags leaving inner content for the template text field
   const htmlString = window.codeMirrorEditor.getValue().trim();
@@ -42,5 +203,17 @@ function populateTextSectionContent() {
       `);
       $('[data-toggle="tooltip"]').tooltip();
     }
+
+    listenToCodeMirror();
+
+    // get template name from window query string "name"
+    templateName = window.location.search.split("name=")[1];
+
+    $("#uploadImage").click(onUploadImageClick);
+    $("#selectedImage").change(onUploadImageChange);
+    $("#fillVariablesSave").click(onFillVarsSave);
+    $("#fillVariablesClose").click(onFillVarsClose);
+    $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
+    $("#fillVarsModal").on("shown.bs.modal", onFillVarsOpen);
   });
 })();

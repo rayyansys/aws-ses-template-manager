@@ -48,6 +48,8 @@ docker run -p 3333:3333 \
   -e AWS_ACCESS_KEY_ID=<your-aws-access-key-id> \
   -e AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key> \
   -e AWS_REGION=<your-aws-region> \
+  -e AWS_S3_BUCKET_NAME=<your-aws-s3-bucket-name> \
+  -e IMAGES_CDN_URL_PREFIX=<your-images-cdn-url-prefix>/ \
   ghcr.io/rayyansys/aws-ses-template-manager:latest
 ```
 
