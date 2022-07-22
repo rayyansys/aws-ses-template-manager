@@ -8,6 +8,9 @@ for **quick and easy reviewing, creating, updating and deleting of AWS SES templ
 Other useful features include:
 - SES template **duplication**.
 - Syntax highlighting for the HTML body of your emails.
+- **Merge variables** into the HTML body of your emails.
+- **Live Preview** of the HTML body of your emails.
+- **S3 image uploads**, served using CDN public URLs (set up Amazon CloudFront distribution with the S3 bucket as the origin).
 - **Send test emails** for your template including adding values for any replacement tags you may have implemented.
 - Be **notified of any newer versions** of this application to always ensure you have the latest features.
 
