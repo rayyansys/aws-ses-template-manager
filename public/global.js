@@ -145,6 +145,10 @@ function onUploadImageChange({ target: { files } }) {
       const editor = window.codeMirrorEditor;
 
       editor.replaceSelection(`<img src="${url}" alt="">`);
+
+      if (!$("#errContainer").hasClass("d-none")) {
+        $("#errContainer").addClass("d-none");
+      }
     },
 
     error: function (xhr) {
