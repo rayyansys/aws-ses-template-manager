@@ -1,5 +1,7 @@
 $(document).ready(function(){
-
+  window.onbeforeunload = function(){
+    return 'Are you sure you want to leave?';
+  };
   // check to see if the template we're creating is a duplicate of an existing template
   const urlParams = new URLSearchParams(window.location.search);
   window.history.replaceState({}, document.title, "/create-template");  // clean the url search params from the URL

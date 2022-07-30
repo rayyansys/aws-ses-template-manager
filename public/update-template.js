@@ -1,4 +1,7 @@
 $(document).ready(() => {
+  window.onbeforeunload = function(){
+    return 'Are you sure you want to leave?';
+  };
   const urlParams = new URLSearchParams(window.location.search);
   const templateName = urlParams.get('name');
 
