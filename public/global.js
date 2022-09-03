@@ -2,7 +2,6 @@ const currentVersion = "v1.5.4";
 
 let previousFillVarsText = "";
 let templateName = "";
-let fieldChanged = false;
 
 const parseJSONText = (jsonText) => {
   return JSON.parse(jsonText || "{}");
@@ -34,6 +33,11 @@ const onCodeMirrorChange = (editor) => {
     onFillVarsSave();
   }, 1);
 };
+
+// for paste event, auto enable submit button
+const onCodeMirrorInputRead = () => {
+  $('#updateTemplateForm button').attr('disabled', false);
+}
 
 const onFillVarsOpen = () => {
   this.fillVarsCodeMirrorEditor.refresh();
@@ -107,6 +111,7 @@ function listenToCodeMirror() {
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
 
     editor.on("change", onCodeMirrorChange);
+    editor.on("inputRead", onCodeMirrorInputRead);
     varsEditor.on("change", onFillVarsChange);
 
     window.fillVarsCodeMirrorEditor.setValue(newFillVarsText);
