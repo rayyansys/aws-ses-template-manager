@@ -2,6 +2,7 @@ const currentVersion = "v1.5.4";
 
 let previousFillVarsText = "";
 let templateName = "";
+let fieldChanged = false;
 
 const parseJSONText = (jsonText) => {
   return JSON.parse(jsonText || "{}");
@@ -9,7 +10,6 @@ const parseJSONText = (jsonText) => {
 
 // updates email Live Preview
 const onCodeMirrorChange = (editor) => {
-
   $("#templatePreview").attr("srcDoc", editor.getValue());
 
   // get variables enclosed with {} from editor
@@ -225,5 +225,16 @@ function populateTextSectionContent() {
     $("#fillVariablesClose").click(onFillVarsClose);
     $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
     $("#fillVarsModal").on("shown.bs.modal", onFillVarsOpen);
+
+    $(window).bind('beforeunload', function(){
+      if (window.location.pathname.match(/\/(create-template|update-template)\/?$/)) {
+          // returning a value that is not null will trigger the native browser confirm dialog.
+          // in Chrome and Edge, it will be "Changes you made may not be saved."
+          // For Firefox, it will be "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
+          // On advantage of this is the ability to run code even when refreshing the page.
+
+          return true;
+        }
+    });
   });
 })();
