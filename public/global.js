@@ -127,12 +127,6 @@ function onUploadImageClick(e) {
   e.preventDefault();
 }
 
-function showError(title, message) {
-  $('#errorModal .modal-title').text(title)
-  $('#errorModal .modal-body').text(message)
-  $('#errorModal').modal('show');
-}
-
 // When the uploadImage input is changed, upload the new image right away
 function onUploadImageChange({ target: { files } }) {
   const formData = new FormData();
@@ -146,12 +140,6 @@ function onUploadImageChange({ target: { files } }) {
   formData.append("file", files[0]);
   formData.append("region", localStorage.getItem("region"));
 
-  const onUploadImageError = (message) => {
-    const defaultContent = "Error uploading image. Please try again.";
-
-    showError(defaultContent, message ?? defaultContent);
-  }
-
   $.ajax({
     type: "POST",
     url: "/upload-image",
@@ -159,20 +147,22 @@ function onUploadImageChange({ target: { files } }) {
     contentType: false,
     processData: false,
 
-    success: function ({ url, error }) {
-      // catches both null and undefined
-      if (url == null || !!error) {
-        onError();
-        return;
-      }
-
+    success: function ({ url }) {
       const editor = window.codeMirrorEditor;
 
       editor.replaceSelection(`<img src="${url}" alt="">`);
     },
 
     error: function (xhr) {
-      onUploadImageError(xhr.responseJSON?.error);
+      let content;
+
+      if (xhr.responseJSON.message) {
+        content = xhr.responseJSON.message;
+      } else {
+        content = "Error uploading image. Please try again.";
+      }
+
+      $("#errContainer").html(content).removeClass("d-none");
     },
   });
 }
