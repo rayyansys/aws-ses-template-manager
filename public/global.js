@@ -156,7 +156,7 @@ function onUploadImageChange({ target: { files } }) {
     success: function ({ url, error }) {
       // catches both null and undefined
       if (url == null || !!error) {
-        onUploadImageError(error);
+        onError();
         return;
       }
 
