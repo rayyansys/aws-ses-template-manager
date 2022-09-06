@@ -53,7 +53,6 @@ $(document).ready(function(){
       url: "/create-template",
       data: createPayload,
       success: function() {
-        $(window).unbind('beforeunload');
         window.location.href = '/';
       },
       error: function(xhr) {

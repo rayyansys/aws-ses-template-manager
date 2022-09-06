@@ -231,19 +231,5 @@ function populateTextSectionContent() {
     $("#fillVariablesClose").click(onFillVarsClose);
     $("#fillVarsModal").on("hidden.bs.modal", onFillVarsClose);
     $("#fillVarsModal").on("shown.bs.modal", onFillVarsOpen);
-
-    $(window).bind('beforeunload', function(){
-      if (window.location.pathname.match(/\/(create-template|update-template)\/?$/)) {
-          // returning a value that is not null will trigger the native browser confirm dialog.
-          // in Chrome and Edge, it will be "Changes you made may not be saved."
-          // For Firefox, it will be "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
-          // An advantage of this is the ability to run code even when refreshing the page.
-
-          return true;
-        }
-
-        // editor is not open -- no need to warn user
-        return null;
-    });
   });
 })();
