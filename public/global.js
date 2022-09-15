@@ -11,6 +11,7 @@ const parseJSONText = (jsonText) => {
 const onCodeMirrorChange = (editor) => {
 
   $("#templatePreview").attr("srcDoc", editor.getValue());
+  $('#updateTemplateForm button').attr('disabled', false);
 
   // get variables enclosed with {} from editor
   let variables =
