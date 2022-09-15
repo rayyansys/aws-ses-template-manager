@@ -11,7 +11,7 @@ const parseJSONText = (jsonText) => {
 const onCodeMirrorChange = (editor) => {
 
   $("#templatePreview").attr("srcDoc", editor.getValue());
-  $('#updateTemplateForm button').attr('disabled', false);
+  $('#createTemplateForm button, #updateTemplateForm button').attr('disabled', false);
 
   // get variables enclosed with {} from editor
   let variables =
@@ -38,7 +38,8 @@ const onCodeMirrorChange = (editor) => {
 
 // for paste event, auto enable submit button
 const onCodeMirrorInputRead = () => {
-  $('#updateTemplateForm button').attr('disabled', false);
+  $('#createTemplateForm button, #updateTemplateForm button').attr('disabled', false);
+
 }
 
 const onFillVarsOpen = () => {
@@ -106,12 +107,12 @@ const onFillVarsClose = () => {
 function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
   const varsEditor = window.fillVarsCodeMirrorEditor;
-
+  
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
     // restore previous fillVars for this template
     const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
-
+    
     editor.on("change", onCodeMirrorChange);
     editor.on("inputRead", onCodeMirrorInputRead);
     varsEditor.on("change", onFillVarsChange);
