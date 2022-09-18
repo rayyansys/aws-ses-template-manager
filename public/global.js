@@ -2,7 +2,6 @@ const currentVersion = "v1.5.4";
 
 let previousFillVarsText = "";
 let templateName = "";
-let fieldChanged = false;
 
 const parseJSONText = (jsonText) => {
   return JSON.parse(jsonText || "{}");
@@ -21,13 +20,18 @@ const bindBeforeunload = () => {
   });
 }
 
-const onCodeMirrorInputRead = () => {
-  bindBeforeunload();
-}
-
 // updates email Live Preview
 const onCodeMirrorChange = (editor) => {
-  $("#templatePreview").attr("srcDoc", editor.getValue());
+  const newCodeMirrorValue = editor.getValue();
+
+  $("#templatePreview").attr("srcDoc", newCodeMirrorValue);
+
+  // check changes in the editor, if so, bind beforeunload event to make sure user is aware of unsaved changes
+  if (newCodeMirrorValue !== window.previousCodeMirrorValue) {
+    bindBeforeunload();
+  }
+
+  window.previousCodeMirrorValue = newCodeMirrorValue;
 
   // get variables enclosed with {} from editor
   let variables =
@@ -36,7 +40,6 @@ const onCodeMirrorChange = (editor) => {
   const fillVars = parseJSONText(
     window.fillVarsCodeMirrorEditor.getValue()
   );
-
 
   const newFillVars = `{\n  ${variables
     .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
@@ -118,13 +121,13 @@ function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
   const varsEditor = window.fillVarsCodeMirrorEditor;
 
+
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
     // restore previous fillVars for this template
     const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
 
     editor.on("change", onCodeMirrorChange);
-    editor.on("inputRead", onCodeMirrorInputRead);
     varsEditor.on("change", onFillVarsChange);
 
     window.fillVarsCodeMirrorEditor.setValue(newFillVarsText);
