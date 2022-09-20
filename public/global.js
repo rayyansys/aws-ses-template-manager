@@ -2,6 +2,7 @@ const currentVersion = "v1.5.4";
 
 let previousFillVarsText = "";
 let templateName = "";
+let codeMirrorValueChanged = false;
 
 const parseJSONText = (jsonText) => {
   return JSON.parse(jsonText || "{}");
@@ -10,12 +11,12 @@ const parseJSONText = (jsonText) => {
 const bindBeforeunload = () => {
   $(window).bind('beforeunload', function(){
     if (window.location.pathname.match(/\/(create-template|update-template)\/?$/)) {
-        // returning a value that is not null will trigger the native browser confirm dialog.
+        // returning a value that is not undefined will trigger the native browser confirm dialog.
         // in Chrome and Edge, it will be "Changes you made may not be saved."
         // For Firefox, it will be "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
         // On advantage of this is the ability to run code even when refreshing the page.
 
-        return true;
+        return codeMirrorValueChanged || undefined;
       }
   });
 }
@@ -26,10 +27,8 @@ const onCodeMirrorChange = (editor) => {
 
   $("#templatePreview").attr("srcDoc", newCodeMirrorValue);
 
-  // check changes in the editor, if so, bind beforeunload event to make sure user is aware of unsaved changes
-  if (newCodeMirrorValue !== window.previousCodeMirrorValue) {
-    bindBeforeunload();
-  }
+  // check changes in the editor
+  codeMirrorValueChanged = newCodeMirrorValue !== window.previousCodeMirrorValue;
 
   window.previousCodeMirrorValue = newCodeMirrorValue;
 
@@ -229,6 +228,8 @@ function populateTextSectionContent() {
 
     // get template name from window query string "name"
     templateName = window.location.search.split("name=")[1];
+
+    bindBeforeunload();
 
     $("#uploadImage").click(onUploadImageClick);
     $("#selectedImage").change(onUploadImageChange);

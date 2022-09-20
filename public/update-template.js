@@ -55,7 +55,6 @@ $(document).ready(() => {
       type: 'PUT',
       data: putPayload,
       success: function() {
-        $(window).unbind('beforeunload');
         window.location.href = '/';
       },
       error: function(xhr) {
