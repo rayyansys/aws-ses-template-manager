@@ -2,16 +2,35 @@ const currentVersion = "v1.5.4";
 
 let previousFillVarsText = "";
 let templateName = "";
+let codeMirrorValueChanged = false;
 
 const parseJSONText = (jsonText) => {
   return JSON.parse(jsonText || "{}");
 }
 
+const bindBeforeunload = () => {
+  $(window).bind('beforeunload', function(){
+    if (window.location.pathname.match(/\/(create-template|update-template)\/?$/)) {
+        // returning a value that is not undefined will trigger the native browser confirm dialog.
+        // in Chrome and Edge, it will be "Changes you made may not be saved."
+        // For Firefox, it will be "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
+        // On advantage of this is the ability to run code even when refreshing the page.
+
+        return codeMirrorValueChanged || undefined;
+      }
+  });
+}
+
 // updates email Live Preview
 const onCodeMirrorChange = (editor) => {
+  const newCodeMirrorValue = editor.getValue();
 
-  $("#templatePreview").attr("srcDoc", editor.getValue());
-  $('#createTemplateForm button, #updateTemplateForm button').attr('disabled', false);
+  $("#templatePreview").attr("srcDoc", newCodeMirrorValue);
+
+  // check changes in the editor
+  codeMirrorValueChanged = newCodeMirrorValue !== window.previousCodeMirrorValue;
+
+  window.previousCodeMirrorValue = newCodeMirrorValue;
 
   // get variables enclosed with {} from editor
   let variables =
@@ -20,7 +39,6 @@ const onCodeMirrorChange = (editor) => {
   const fillVars = parseJSONText(
     window.fillVarsCodeMirrorEditor.getValue()
   );
-
 
   const newFillVars = `{\n  ${variables
     .map((variable) => `"${variable}": "${fillVars[variable] || ""}"`)
@@ -107,12 +125,17 @@ const onFillVarsClose = () => {
 function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
   const varsEditor = window.fillVarsCodeMirrorEditor;
-  
+<<<<<<< HEAD
+
+=======
+
+
+>>>>>>> master
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
     // restore previous fillVars for this template
     const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
-    
+
     editor.on("change", onCodeMirrorChange);
     editor.on("inputRead", onCodeMirrorInputRead);
     varsEditor.on("change", onFillVarsChange);
@@ -129,6 +152,12 @@ function onUploadImageClick(e) {
   e.preventDefault();
 }
 
+function showError(title, message) {
+  $('#errorModal .modal-title').text(title)
+  $('#errorModal .modal-body').text(message)
+  $('#errorModal').modal('show');
+}
+
 // When the uploadImage input is changed, upload the new image right away
 function onUploadImageChange({ target: { files } }) {
   const formData = new FormData();
@@ -142,6 +171,12 @@ function onUploadImageChange({ target: { files } }) {
   formData.append("file", files[0]);
   formData.append("region", localStorage.getItem("region"));
 
+  const onUploadImageError = (message) => {
+    const defaultContent = "Error uploading image. Please try again.";
+
+    showError(defaultContent, message ?? defaultContent);
+  }
+
   $.ajax({
     type: "POST",
     url: "/upload-image",
@@ -149,22 +184,20 @@ function onUploadImageChange({ target: { files } }) {
     contentType: false,
     processData: false,
 
-    success: function ({ url }) {
+    success: function ({ url, error }) {
+      // catches both null and undefined
+      if (url == null || !!error) {
+        onUploadImageError(error);
+        return;
+      }
+
       const editor = window.codeMirrorEditor;
 
       editor.replaceSelection(`<img src="${url}" alt="">`);
     },
 
     error: function (xhr) {
-      let content;
-
-      if (xhr.responseJSON.message) {
-        content = xhr.responseJSON.message;
-      } else {
-        content = "Error uploading image. Please try again.";
-      }
-
-      $("#errContainer").html(content).removeClass("d-none");
+      onUploadImageError(xhr.responseJSON?.error);
     },
   });
 }
@@ -216,6 +249,8 @@ function populateTextSectionContent() {
 
     // get template name from window query string "name"
     templateName = window.location.search.split("name=")[1];
+
+    bindBeforeunload();
 
     $("#uploadImage").click(onUploadImageClick);
     $("#selectedImage").change(onUploadImageChange);

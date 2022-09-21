@@ -39,7 +39,7 @@ class ImageController {
       response.status(200).send({ url });
     } catch (err) {
       console.error(err.message);
-      response.status(500).send({ error: "Error uploading image" });
+      response.status(500).send({ error: err.message ?? "Error uploading image" });
     }
   }
 }

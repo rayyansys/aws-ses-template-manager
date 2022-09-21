@@ -24,7 +24,12 @@ $(document).ready(() => {
     $('#templateSubject').val(response.data.SubjectPart);
     $('#templateText').val(response.data.TextPart);
 
-    window.codeMirrorEditor.setValue(response.data.HtmlPart ? response.data.HtmlPart : "");
+    const newCodeMirrorValue = response.data.HtmlPart ? response.data.HtmlPart : "";
+
+    // This is needed to detect changes in the editor, because the change event is also triggered when the editor is first loaded.
+    window.previousCodeMirrorValue = newCodeMirrorValue;
+
+    window.codeMirrorEditor.setValue(newCodeMirrorValue);
 
     $('#updateTemplateForm').removeClass('d-none'); //show the form only when we have pre-populated all inputs
     window.codeMirrorEditor.refresh();  //must be called to re draw the code editor
