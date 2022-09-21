@@ -41,6 +41,8 @@ $(document).ready(() => {
 
 
   $('#updateTemplateForm').submit(function(e){
+    window.isSubmitting = true;
+
     e.preventDefault();
     const putPayload = {
       "TemplateName": $('#templateName').val(),

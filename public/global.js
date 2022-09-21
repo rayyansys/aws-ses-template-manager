@@ -16,7 +16,9 @@ const bindBeforeunload = () => {
         // For Firefox, it will be "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
         // On advantage of this is the ability to run code even when refreshing the page.
 
-        return codeMirrorValueChanged || undefined;
+        const isSubmitting  = !!window.isSubmitting;
+
+        return (isSubmitting || !codeMirrorValueChanged) ? undefined : true;
       }
   });
 }
