@@ -30,6 +30,10 @@ const onCodeMirrorChange = (editor) => {
   // check changes in the editor
   codeMirrorValueChanged = newCodeMirrorValue !== window.previousCodeMirrorValue;
 
+  if (codeMirrorValueChanged) {
+    $('#updateTemplateForm button, #createTemplateForm button').attr('disabled', false);
+  }
+
   window.previousCodeMirrorValue = newCodeMirrorValue;
 
   // get variables enclosed with {} from editor
@@ -53,12 +57,6 @@ const onCodeMirrorChange = (editor) => {
     onFillVarsSave();
   }, 1);
 };
-
-// for paste event, auto enable submit button
-const onCodeMirrorInputRead = () => {
-  $('#createTemplateForm button, #updateTemplateForm button').attr('disabled', false);
-
-}
 
 const onFillVarsOpen = () => {
   this.fillVarsCodeMirrorEditor.refresh();
@@ -125,19 +123,13 @@ const onFillVarsClose = () => {
 function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
   const varsEditor = window.fillVarsCodeMirrorEditor;
-<<<<<<< HEAD
 
-=======
-
-
->>>>>>> master
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
     // restore previous fillVars for this template
     const lcFillVars = parseJSONText(localStorage.getItem("fillVars"));
     const newFillVarsText = JSON.stringify(lcFillVars[templateName] || {}, null, 2);
 
     editor.on("change", onCodeMirrorChange);
-    editor.on("inputRead", onCodeMirrorInputRead);
     varsEditor.on("change", onFillVarsChange);
 
     window.fillVarsCodeMirrorEditor.setValue(newFillVarsText);
