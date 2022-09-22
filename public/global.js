@@ -32,6 +32,10 @@ const onCodeMirrorChange = (editor) => {
   // check changes in the editor
   codeMirrorValueChanged = newCodeMirrorValue !== window.previousCodeMirrorValue;
 
+  if (codeMirrorValueChanged) {
+    $('#updateTemplateForm button, #createTemplateForm button').attr('disabled', false);
+  }
+
   window.previousCodeMirrorValue = newCodeMirrorValue;
 
   // get variables enclosed with {} from editor
@@ -121,7 +125,6 @@ const onFillVarsClose = () => {
 function listenToCodeMirror() {
   const editor = window.codeMirrorEditor;
   const varsEditor = window.fillVarsCodeMirrorEditor;
-
 
   if (typeof editor !== "undefined" && typeof varsEditor !== "undefined") {
     // restore previous fillVars for this template
