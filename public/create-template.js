@@ -35,6 +35,8 @@ $(document).ready(function(){
 
   // handle form submissions
   $('#createTemplateForm').submit(function(e) {
+    window.isSubmitting = true;
+
     e.preventDefault();
 
     const createPayload = {
